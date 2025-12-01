@@ -1,23 +1,23 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  FlatList,
-  Image,
-  Linking,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    FlatList,
+    Image,
+    Linking,
+    Platform,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
-import Comment from "@/components/Comment";
 import DateRangePicker from "@/components/DateRangePicker";
 import FavoriteButton from "@/components/FavoriteButton";
 import PropertiesMap from "@/components/PropertiesMap";
+import PropertyReviewsList from "@/components/PropertyReviewsList";
 import ShareModal from "@/components/ShareModal";
 import { facilities } from "@/constants/data";
 import icons from "@/constants/icons";
@@ -50,6 +50,8 @@ const Property = () => {
   const [agentData, setAgentData] = useState<any>(null);
   const [shareModalVisible, setShareModalVisible] = useState(false);
   const { location } = useLocation();
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
   // Get all images from the images array
   const allImages = property ? (property.images || []).filter(Boolean) : [];
@@ -347,7 +349,7 @@ const Property = () => {
             <View className="flex flex-row items-center gap-2">
               <Image source={icons.star} className="size-5" />
                 <Text className="text-black-200 text-sm mt-1 font-rubik-medium">
-                {prop.rating} ({prop.reviews?.length || 0} reviews)
+                {reviewRating > 0 ? reviewRating.toFixed(1) : '0.0'} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
               </Text>
             </View>
           </View>
@@ -387,7 +389,7 @@ const Property = () => {
 
                 <View className="flex flex-col items-start justify-center ml-3">
                   <Text className="text-lg text-black-300 text-start font-rubik-bold">
-                    {agentData?.name || prop.agent?.name || 'Unknown'}
+                    {agentData?.name || (typeof prop.agent === 'object' ? prop.agent?.name : null) || 'Loading...'}
                   </Text>
                   {agentData?.phone ? (
                     <Text className="text-sm text-black-200 text-start font-rubik-medium">
@@ -520,28 +522,16 @@ const Property = () => {
             })()}
           </View>
 
-          {property.reviews && property.reviews.length > 0 && (
-            <View className="mt-7">
-              <View className="flex flex-row items-center justify-between">
-                <View className="flex flex-row items-center">
-                  <Image source={icons.star} className="size-6" />
-                  <Text className="text-black-300 text-xl font-rubik-bold ml-2">
-                    {property.rating} ({property.reviews.length} reviews)
-                  </Text>
-                </View>
-
-                <TouchableOpacity>
-                  <Text className="text-primary-300 text-base font-rubik-bold">
-                    View All
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View className="mt-5">
-                <Comment item={property.reviews[0]} />
-              </View>
-            </View>
-          )}
+          {/* Reviews Section - New Review System */}
+          <PropertyReviewsList
+            propertyId={id!}
+            showWriteButton={true}
+            maxReviews={3}
+            onReviewCountChange={(count, average) => {
+              setReviewCount(count);
+              setReviewRating(average || 0);
+            }}
+          />
         </View>
       </ScrollView>
 
