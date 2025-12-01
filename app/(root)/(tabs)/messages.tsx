@@ -1,9 +1,10 @@
 import AgentSelectorModal from '@/components/AgentSelectorModal';
+import icons from '@/constants/icons';
 import { useAgents } from '@/lib/agents-provider';
 import { client, config, ConversationDocument, createOrGetConversation, deleteConversation, getAgentById, getUserConversations, markConversationAsRead, searchAgentsByName } from '@/lib/appwrite';
 import { useGlobalContext } from '@/lib/global-provider';
 import { Ionicons } from '@expo/vector-icons';
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -23,7 +24,23 @@ const ChatListScreen = () => {
   const { user } = useGlobalContext();
 
   if (!user) {
-    return <Redirect href="/sign-in" />;
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loginPrompt}>
+          <Image source={icons.chat} style={{ width: 80, height: 80, marginBottom: 24 }} tintColor="#CCCCCC" />
+          <Text style={styles.loginTitle}>Login Required</Text>
+          <Text style={styles.loginMessage}>
+            You need to sign in to view and send messages
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push('/sign-in')}
+            style={styles.loginButton}
+          >
+            <Text style={styles.loginButtonText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   const { getAgent, setAgent } = useAgents();
@@ -735,6 +752,38 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     lineHeight: 20,
+  },
+  loginPrompt: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  loginTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  loginMessage: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  loginButton: {
+    backgroundColor: '#0061FF',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 9999,
+    width: '100%',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 
